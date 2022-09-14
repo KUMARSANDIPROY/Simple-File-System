@@ -78,8 +78,8 @@ Commands
  Screenshots
  --------------------
  
-![a1](https://user-images.githubusercontent.com/15118630/189681014-7e218c82-561f-453a-a520-01b1684bf3e4.jpg)
-![a2](https://user-images.githubusercontent.com/15118630/189681042-ef9939b0-262d-495b-ba63-34143446881d.jpg)
-![a3](https://user-images.githubusercontent.com/15118630/189681105-fe29e4cc-26fc-441f-acb7-014294e263a8.jpg)
-![a4](https://user-images.githubusercontent.com/15118630/189681126-62d03699-ab34-41bf-85de-aef96e4a5746.jpg)
-![a5](https://user-images.githubusercontent.com/15118630/189681163-f907ea26-a229-4f8b-8b00-b3d402787185.jpg)
+![189676424-737578e1-f081-4972-a770-9bb4aa088460](https://user-images.githubusercontent.com/52081779/190222596-c8d85518-e14d-4585-b727-8fc4f8789f18.JPG)
+![189676426-7f38af7f-db83-4749-8368-5c43b3ce9475](https://user-images.githubusercontent.com/52081779/190222707-f95c5515-d2bb-431c-ab92-538aa18ec8d0.JPG)
+![189676429-e4646a9c-b028-477e-a2d6-1151dac7815d](https://user-images.githubusercontent.com/52081779/190222830-5e8e061e-e7ac-4fa8-a841-35a48bfcd2d4.JPG)
+![189676432-1dd93a82-53d3-4f01-8f8c-c8e4d660dfef](https://user-images.githubusercontent.com/52081779/190222908-6e17cf88-3b98-413f-8790-38f8bebd5e3d.JPG)
+![189676416-bc03ba4a-ad32-4a53-a53b-9625a3225a8f](https://user-images.githubusercontent.com/52081779/190223029-f6d62b6b-4036-4f8d-89d0-cba266bb9514.JPG)
