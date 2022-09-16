@@ -77,9 +77,9 @@ Commands
  
  Screenshots
  --------------------
- 
-![189676424-737578e1-f081-4972-a770-9bb4aa088460](https://user-images.githubusercontent.com/52081779/190222596-c8d85518-e14d-4585-b727-8fc4f8789f18.JPG)
-![189676426-7f38af7f-db83-4749-8368-5c43b3ce9475](https://user-images.githubusercontent.com/52081779/190222707-f95c5515-d2bb-431c-ab92-538aa18ec8d0.JPG)
-![189676429-e4646a9c-b028-477e-a2d6-1151dac7815d](https://user-images.githubusercontent.com/52081779/190222830-5e8e061e-e7ac-4fa8-a841-35a48bfcd2d4.JPG)
-![189676432-1dd93a82-53d3-4f01-8f8c-c8e4d660dfef](https://user-images.githubusercontent.com/52081779/190222908-6e17cf88-3b98-413f-8790-38f8bebd5e3d.JPG)
-![189676416-bc03ba4a-ad32-4a53-a53b-9625a3225a8f](https://user-images.githubusercontent.com/52081779/190223029-f6d62b6b-4036-4f8d-89d0-cba266bb9514.JPG)
+ ![Screenshot from 2022-09-17 00-58-33](https://user-images.githubusercontent.com/52081779/190717102-723b9d63-9b0f-4849-ad1d-b5ba064968d2.png)
+
+![Screenshot from 2022-09-17 00-58-45](https://user-images.githubusercontent.com/52081779/190717149-338a8496-f990-44f4-a214-3e1e6c1917f9.png)
+![Screenshot from 2022-09-17 01-01-07](https://user-images.githubusercontent.com/52081779/190717170-758a3ad3-5372-4290-8d31-245b342040b3.png)
+![Screenshot from 2022-09-17 01-01-33](https://user-images.githubusercontent.com/52081779/190717203-de938a68-1f9b-48d5-8029-769249c33e0a.png)
+![Screenshot from 2022-09-17 01-02-49](https://user-images.githubusercontent.com/52081779/190717216-594de165-5336-41c1-bf2a-c4a915026e8e.png)
