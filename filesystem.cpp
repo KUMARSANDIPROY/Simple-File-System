@@ -1,290 +1,310 @@
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <unordered_map>
-#include <set>
-#include <sstream>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <string.h>				
-#include <stdlib.h>
-
-#define block_size 4
-
+#include<iostream>
+#include<vector>
+#include<map>
+#include<set>
+#include<cmath>
+#include<iomanip>
 using namespace std;
 
-// filename | inode
-unordered_map<string,int> meta_data;     
-// inode | no_of_blocks
-unordered_map<int,int> disk_blocks;    
-//to maintain unique filenames
-set<string> file_list;
-//to maintain unique inodes
-set<int> inode_list;
+//stores the names of files for a particular inode number
+map<int, vector<string> > files_list;
 
-//Receiving the command by the user
- vector<string> split(string str, char delimiter) 
- {
-    vector<string> internal;
-    stringstream ss(str); // Turn the string into a stream.
-    string tok;
-    while(getline(ss, tok, delimiter)  ) 
-	{
-        internal.push_back(tok);
-    }
-    return internal;
-}
-vector <string> get_command()
-{
-    string  cmd;
-    //initialCommit();
-    getline(cin, cmd);
-    vector <string> cmmCMD = split(cmd, ' ');
-    return cmmCMD;
-}
+//stores inode number for a file
+map<string,int> inode_number;
+
+//stores the names of already used filenames in a set
+set<string> used_file_names;
+
+//stores the content of a file
+map<int, string > file_data;
 
 
-//creating a new file in the file system
+//-------------------------Function declaration----------------------------------
+bool create_files(string filename , string file_content);
+bool delete_files(string filename);
+void rename_files(string filename1 , string filename2);
+void print_file_content(string filename);
+void display_filenames();
+void delete_all_files();
 
-int create(vector<string> cmd)
-{
-	FILE *fin;
-	if (cmd.size() < 3)
-	{
-        cout << "MISSING DATA: Insufficient arguments \n";
-        return 0;
-    }
-    if(file_list.find(cmd[1])!=file_list.end())
-    {
-    	cout<< "File with the name already exists!! \n";
-    	return 0;
-	}
-	//insert the filename into the list
-	file_list.insert(cmd[1]);
-	//create a unique inode for file
-	int inode;
-	while(1)
-	{
-		inode = rand();
-		if(inode_list.find(inode) == inode_list.end())
-		{
-			//insert filename and corresponding inode into meta_data
-			meta_data.insert(make_pair(cmd[1], inode));
-			break;
-		}
-	}
-	//insert the inode into the inode list
-	inode_list.insert(inode);
-    string content = cmd[2];
-    if(cmd.size()>3)
-    {
-    	for(int i=3; i<cmd.size();i++)
-    	{
-    		content.append(" ");
-    		content.append(cmd[i]);
-		}
-	}
-    content.erase(content.begin()+0);
-    content.erase(content.begin()+content.length()-1);
-    
-    //calculate the number of disk files required
-    int nblocks;
-    if(content.length() % 4 == 0)
-    	nblocks = content.length()/4;
-    else
-    	nblocks = content.length()/4 + 1;
-    
-    //create disk block files with name inodeno_blockno
-    int temp = 0;
-    for(int i=1; i<= nblocks; i++ )
-    {
-    	string fc = content.substr(temp, 4);
-    	char num[3], inode_num[20], fname[20];
-    	memset(num,0,3);
-    	memset(inode_num, 0 , 20);
-    	sprintf(inode_num, "%d",inode);
-		sprintf(num,"%d",i);
-		_snprintf(fname,sizeof(fname),"%s%s%s%s%s", "root/", inode_num, "_", num,".txt");
-		const char* con = fc.c_str();
-		fin = fopen(fname, "w");
-		fprintf(fin, con );
-		fclose(fin);
-		temp += 4;
-	}
-	disk_blocks.insert(make_pair(inode, nblocks));
-    cout<<"File created\n"<<endl;
-}
-
-//deleting a file from the file system
-void delete_file(vector<string> cmd)
-{
-	string filename = cmd[1];
-	//check if the file with given name is present in the file system
-	auto it1 = meta_data.find(filename);
-	if(it1 == meta_data.end())
-	{
-		cout<<"file not found"<<endl;
-		return;
-	}
+//-----------------------------------main-----------------------------------------
+int main(){
+	string command;
+	while(true){
 		
-	//get the inode of the file to be deleted
-	int inode = it1->second;
-	//remove the file entry from the meta data
-	meta_data.erase(filename);
-	
-	//retrieve the number of disk files created for the file to be deleted
-	auto it2 = disk_blocks.find(inode);
-	int nblocks = it2->second;
-	
-	// remove the disk block entry from the file
-	disk_blocks.erase(inode);
-	
-	//delete all the disk files
-	for(int i=1; i<= nblocks; i++ )
-    {
-    	char num[3], inode_num[20], fname[20];
-    	memset(num,0,3);
-    	memset(inode_num, 0 , 20);
-    	sprintf(inode_num, "%d",inode);
-		sprintf(num,"%d",i);
-		_snprintf(fname,sizeof(fname),"%s%s%s%s%s", "root/", inode_num, "_", num,".txt");
-		remove(fname);
-	}
-	//remove the file from the list of files
-	file_list.erase(cmd[1]);
-	//remove the inode from the inode list
-	inode_list.erase(inode);
-	
-	cout<<"File deleted"<<endl;
-}
-
-//rename a file 
-void rename(vector<string> cmd)
-{
-	if(cmd.size() !=3)
-	{
-		cout << "MISSING DATA: Insufficient arguments \n";
-        return;
-	}
-	string filename = cmd[1];
-	string newfname = cmd[2];
-	//check whether the new filename is unique
-	if(file_list.find(cmd[2])!=file_list.end())
-    {
-    	cout<< "File with the name already exists!! \n";
-    	return;
-	}
-	//check if the file with given name is present in the file system
-	auto it1 = meta_data.find(filename);
-	if(it1 == meta_data.end())
-	{
-		cout<<"file not found"<<endl;
-		return;
-	}
-	int inode = it1->second;
-	meta_data.erase(filename);
-	//rename the filename in the metadata
-	meta_data.insert(make_pair(newfname, inode));
-	//remove the file from the list of files
-	file_list.erase(cmd[1]);
-	//insert the new filename into the list of files
-	file_list.insert(cmd[2]);
-}
-
-//display the contents of a file
-void display(vector<string> cmd)
-{
-	FILE *fin;
-	string filename = cmd[1];
-	//check if the file with given name is present in the file system
-	auto it1 = meta_data.find(filename);
-	if(it1 == meta_data.end())
-	{
-		cout<<"file not found"<<endl;
-		return;
-	}
-	//get the inode of the file to be displayed
-	int inode = it1->second;
-	
-	//retrieve the number of disk files created for the file to be displayed
-	auto it2 = disk_blocks.find(inode);
-	int nblocks = it2->second;
-	
-	//display all the disk file contents
-	for(int i=1; i<= nblocks; i++ )
-    {
-    	char num[3], inode_num[20], fname[20];
-    	char buf[10];
-    	memset(num,0,3);
-    	memset(inode_num, 0 , 20);
-    	sprintf(inode_num, "%d",inode);
-		sprintf(num,"%d",i);
-		_snprintf(fname,sizeof(fname),"%s%s%s%s%s","root/", inode_num, "_", num,".txt");
-		fin = fopen(fname, "r");
-		fscanf(fin,"%[^\n]s", buf);
-		cout<<buf;
-	}
-	cout<<endl;
-}
-
-//list all the files from the metadata
-void list_files()
-{
-	cout<<"-------------------------------------------------"<<endl;
-	cout<<"FILE NAME\tINODE NUMBER\n";
-	cout<<"-------------------------------------------------"<<endl;
-	for(auto it : meta_data)
-	{
-		cout<<it.first<<"\t\t"<<it.second<<endl;
-	}
-	cout<<"-------------------------------------------------"<<endl;
-}
-/* run this program using the console pauser or add your own getch, system("pause") or input loop */
-
-int main(int argc, char** argv) {
-	vector<string> cmd;
-	int res;
-	
-	//creating root directory
-	char* dirname= "root";
-	mkdir(dirname);
-	
-	while(1)
-	{
-		cout<<"\nEnter Command $ ";
-		//read the command from the user
-		cmd = get_command();
+		//taking command as input from console
+		cout<<"\nEnter command (To exit , enter \"EXIT\" without quotes): ";
+		getline(cin,command);
 		
-		if ( cmd[0] == "mf" )
-		{
-			res = create(cmd);
-			if(res == 0)
-			{
-				cout<<"Cannot create the file"<<endl;
+		//exit form program
+		if(command=="EXIT") break;
+		int l = command.size();
+		
+		//no command is of size less than 2
+		if(l<2) cout<<"\nINVALID COMMAND!\n";
+		
+		//Create file command
+		if(command[0]=='m' && command[1]=='f'){
+			int i;
+			
+			//create file command size cannot be less than 6
+			if(l<6 || command[2]!=' '){
+				cout<<"INVALID COMMAND!\n";
+				continue;
 			}
-		}
-		else if ( cmd[0] == "df" )
-		{
-			delete_file(cmd);
-		}
-		else if ( cmd[0] == "rf" )
-		{
-			rename(cmd);
-		}
-		else if ( cmd[0] == "pf" )
-		{
-			display(cmd);
-		}
-		else if ( cmd[0] == "ls" )
-		{
-			list_files();
-		}
-		else
-		{
-			cout<<"Enter a valid command!!!"<<endl;
+			
+			//checking if file content has been provided or not
+			for(i = 3 ; i < l ; i++)
+				if(command[i]==' ') break;
+			if(i==l){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			
+			//getting filename from command
+			int file_name_size = i-3;
+			string filename = command.substr(3,file_name_size);
+			
+			//getting file content
+			string file_content = command.substr(i+1);
+			if(file_content.size()==0) {
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			
+			//calling create file function
+			bool cr = create_files(filename, file_content);
+			if(cr) cout<<"File Created!\n";		
 		}
 		
+		//delete dile command
+		else if(command[0]=='d' && command[1]=='f'){
+			//command size cannot be less than 4
+			if(l<4 || command[2]!=' '){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			
+			//getting filename from command
+			string filename = command.substr(3);
+			if(filename.size()==0){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			
+			//callinf delete file function
+			int dl = delete_files(filename);
+			if(dl) cout<<"File deleted!\n";
+		}
+		
+		//rename file 
+		else if(command[0]=='r' && command[1]=='f'){
+			//command size cannot be less than 6
+			if(l<6 || command[2]!=' '){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			
+			//checking filenames
+			int i;
+			for(i = 3 ; i < l ; i++)
+				if(command[i]==' ') break;
+			if(i==l){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			int file_name_size = i-3;
+			if(file_name_size<=0){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			
+			//getting the old and new filenames
+			string filename1 = command.substr(3,file_name_size);
+			if(i>=l-1){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			string filename2 = command.substr(i+1);
+			
+			//calling the rename file function
+			rename_files(filename1, filename2);
+		}
+		
+		//print file function
+		//prints the contents of the required file
+		else if(command[0]=='p' && command[1]=='f'){
+			if(l<4 || command[2]!=' '){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			string filename = command.substr(3);
+			print_file_content(filename);
+		}
+		
+		//ls command - lists all the files and their inode numbers
+		else if(command[0]=='l' && command[1]=='s'){
+			if(l>2){
+				cout<<"INVALID COMMAND!\n";
+				continue;
+			}
+			display_filenames();
+		}
+		else{
+			cout<<"INVALID COMMAND!\n";
+		}
 	}
 	
+	//delete all files in the end
+	delete_all_files();
 	return 0;
+}
+
+//----------------------------Function Definition--------------------------------
+
+//creates files with name filename and content file_content
+//the content is divided into strings of four characters and put into separate files
+bool create_files(string filename , string file_content){
+	
+	//checking if the filename already exits
+	//if it does then return from the funtion
+	if(used_file_names.find(filename)!=used_file_names.end()){
+		cout<<"A file with this name already exists!\n";
+		return false;
+	}
+	
+	//generating a random inode number for the file
+	int inode_num = rand()%1000;
+	
+	//checking if the generated inode number already exists
+	while(files_list.find(inode_num)!=files_list.end())
+		inode_num = rand()%1000+1;
+		
+	//inserting this new filename to the used_file_names set
+	used_file_names.insert(filename);
+	inode_number[filename] = inode_num;
+	file_data[inode_num] = file_content;
+	int l = file_content.size();
+	
+	//No. of files to be created
+	int num_files = ceil((float)l/4);
+	
+	int j = 0;
+	//creating files and putting 4 bytes of data in each file
+	for(int i = 0 ; i < num_files ; i++){
+		string file ="root/" + filename +"_"+ to_string(i)+".txt";
+		files_list[inode_num].push_back(file);
+		FILE* fp = fopen(file.c_str(),"w");
+		for(int k = 0 ; k < 4 && j<l ;k++,j++)
+			fprintf(fp,"%c" , file_content[j]);
+		fclose(fp);
+	}
+	return true;
+}
+
+//deletes file with name filename(if it exists)
+bool delete_files(string filename){
+	
+	//cheking if the file with name filename exists or not
+	//if it doesnot then return from function
+	if(used_file_names.find(filename)==used_file_names.end()){
+		cout<<"This file doesnot exists\n";
+		return false;
+	}
+	
+	//getting the inode number of file to be deleted	
+	int inode_num = inode_number[filename];
+	
+	//getting the list of files to be deleted
+	vector<string> to_delete = files_list[inode_num];
+	int l = to_delete.size();
+	
+	//deleting the files
+	for(int i = 0 ; i < l ; i++){
+		remove(to_delete[i].c_str());
+	}
+	
+	//removing the file info from maps and set
+	files_list.erase(inode_num);
+	file_data.erase(inode_num);
+	used_file_names.erase(filename);
+	inode_number.erase(filename);
+	return true;
+}
+
+//renames filename1 to filename2
+void rename_files(string filename1 , string filename2){
+	//cheking if the file with name filename1 exists or not
+	//if it doesnot then return from function
+	if(used_file_names.find(filename1)==used_file_names.end()){
+		cout<<"The file to be named doesnot exist";
+		return;
+	}
+	
+	//checking if the filename2 already exits
+	//if it does then return from the funtion
+	if(used_file_names.find(filename2)!=used_file_names.end()){
+		cout<<"A file with new name already exists";
+		return;
+	}
+	
+	//Removig filename1 from  set and inserting filename2
+	used_file_names.erase(filename1);
+	used_file_names.insert(filename2);
+	
+	//getting inode number for filename1 and the list of files
+	int inode_num = inode_number[filename1];
+	vector<string> files = files_list[inode_num];
+	int l = files_list[inode_num].size();
+	
+	//renaming files and updating the files_list map
+	for(int i = 0 ; i < l ; i++){
+		string file = "root/" + filename2 +"_"+ to_string(i)+".txt"; 
+		//string old = files[i];
+		string old = "root/" + filename1 +"_"+ to_string(i)+".txt"; 
+		rename(old.c_str(),file.c_str());
+		files[i] = file;
+	}
+	files_list[inode_num] = files;
+	
+	//inserting filename2 in inode_number map
+	inode_number[filename2] = inode_num;
+	inode_number.erase(filename1);
+	cout<<filename1<<" has been renamed to "<<filename2<<endl;
+}
+void print_file_content(string filename){
+	//checking if the requested file exixtx or not
+	if(used_file_names.find(filename)==used_file_names.end()){
+		cout<<"This file doesnot exist\n";
+		return;
+	}
+	
+	//getting the inode number of the requested file 
+	int inode_num = inode_number[filename];
+	
+	//printing the contents of that file
+	cout<<file_data[inode_num];
+}
+
+//Display all the filenames in the directory with their inode numbers
+void display_filenames(){
+	cout<<"\n\n";
+	cout<<setw(20)<<"FILENAME"<<setw(15)<<"INODE NUMBER\n";
+	cout<<"========================================\n";
+	for(auto it : inode_number){
+		cout<<setw(18)<<it.first<<setw(10)<<it.second<<endl;
+		cout<<"________________________________________\n";
+	}
+	cout<<endl;	
+}
+
+//deleting all files after execution of the program
+void delete_all_files(){
+	for(auto it : files_list)
+	{
+		vector<string> to_delete = it.second;
+		int l = to_delete.size();
+		for(int i = 0 ; i < l ; i++)
+			remove(to_delete[i].c_str());
+	}
 }
