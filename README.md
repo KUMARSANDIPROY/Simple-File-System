@@ -12,32 +12,16 @@ Input
 * Input is taken through Console.
 
 * Input includes the following commands: 
-	- mf file-name “filecontents”
+	- mf file-name filecontents
 	- df file-name
 	- rf file-name1 file-name2
         - pf file-name 
         - ls
-
-
-
-
-Data structures used
-------------------------------
-
-* Two unordered maps are used to maintain the meta data and disk blocks
-
-	* meta_data : name of the file | inode number
-	* disk_blocks : inode number | number of blocks
-
-* Two sets are used to check for the uniqueness of the file names and inode numbers.
-
-
-
-
+	
 Commands
 -----------------------------
 
-* mf file-name “filecontents”
+* mf file-name filecontents
 	* first check for the uniqueness of the filename
 	* create a unique inode for file
 	* insert filename and corresponding inode into the meta data.
