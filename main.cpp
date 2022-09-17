@@ -4,6 +4,8 @@
 #include<set>
 #include<cmath>
 #include<iomanip>
+#include <sys/types.h>
+#include <sys/stat.h>
 using namespace std;
 
 //stores the names of files for a particular inode number
@@ -30,6 +32,8 @@ void delete_all_files();
 //-----------------------------------main-----------------------------------------
 int main(){
 	string command;
+	const char *s="root";
+        mkdir(s,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	while(true){
 		
 		//taking command as input from console
